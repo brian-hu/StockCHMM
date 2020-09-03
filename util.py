@@ -1,3 +1,7 @@
+"""
+This class contains common functions used for stock prediction and HMM training
+"""
+
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -7,7 +11,18 @@ import argparse
 
 from hmm import HMM
 
+#######################
+# Generate Stock Data #
+#######################
 def gen_data(stock):
+    """Generates stock data
+
+    Args:
+        stock: a dataframe containing the stock data
+    Returns:
+        orig: the original open and close prices
+        train: the training data containing return value, fraction of the high value and fraction of the low value
+    """
     fracChange = (stock.Close - stock.Open) / stock.Open
     fracHigh = (stock.High - stock.Open) / stock.Open
     fracLow = (stock.Open - stock.Low) / stock.Open
@@ -16,6 +31,14 @@ def gen_data(stock):
     return orig, train
 
 def random_splits(n_splits, total):
+    """Creates a numpy array with values that represent random splits of a value
+
+    Args:
+        num_splits: the number of splits
+        total: the value to be split
+    Returns:
+        an array of splits
+    """
     splits = np.zeros((n_splits))
     for i in range(n_splits - 1):
         splits[i] = total * np.random.rand()
@@ -23,7 +46,23 @@ def random_splits(n_splits, total):
     splits[-1] = total
     return splits
 
-def train_hmm(X, k, prev_hmm=None, window_size=5, num_clusters=5, num_states=4, max_iter=5):
+#############
+# Train HMM #
+#############
+def train_hmm(X, k, prev_hmm=None, window_size=5, num_clusters=5, num_states=4, max_iter=10):
+    """Trains an HMM
+    
+    Args:
+        X: the data
+        k: the number of sequences to divide the data into
+        prev_hmm: an HMM object to set the parameters
+        window_size: the window size of exponential weighting
+        num_clusters: the number of mixtures in each GMM
+        num_states: the number of states in the HMM
+        max_iter: the max number of iterations allowed in the HMM
+    Returns:
+        the trained HMM
+    """
     temp_X = X.reshape((k, X.shape[0] // k, X.shape[1]))
     num_features = X.shape[1] 
     
